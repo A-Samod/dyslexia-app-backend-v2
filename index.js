@@ -26,7 +26,7 @@ app.post("/uploads", uploads.single("image"), (req, res) => {
     process.stdout.on('data', function(data){
       //  console.log("==================== 1.1 ===================");
         scriptData = data.toString().replace(/(\r\n|\n|\r)/gm,""); ;
-        console.log(scriptData);
+        console.log("letters", scriptData);
     });
 
     // console.log("==================== 2 ===================");

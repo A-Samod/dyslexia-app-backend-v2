@@ -1,27 +1,30 @@
-// 
-
 const UserActivity = require('../models/userActivityModel');
 const firestore = require('../config/firebaseConfig');
 
 exports.fetchUserActivities = async (userId) => {
-  return await UserActivity.find({userId}, null, {sort: {date: -1}});
+  const activities = await UserActivity.find({ userId }, null, { sort: { date: -1 } });
+
+  // Convert usedTime from seconds to minutes:seconds format
+  const formattedActivities = activities.map((activity) => {
+    const minutes = Math.floor(activity.usedTime / 60);
+    const seconds = activity.usedTime % 60;
+    const formattedUsedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`; // Format as MM:SS
+
+    return {
+      ...activity.toObject(), // Convert mongoose document to plain object
+      usedTime: formattedUsedTime, // Replace usedTime with formatted string
+    };
+  });
+
+  return formattedActivities;
 };
-
-// exports.addUserActivity = async (activityData) => {
-//   const activity = new UserActivity(activityData);
-//   return await activity.save();
-// };
-
-
-//const UserActivity = require('../models/userActivityModel');
 
 exports.addUserActivity = async (activityData) => {
   try {
-    console.log('activityData >>>', activityData.userId);
-     // Validate userId
-     if (!activityData.userId) {
-        throw new Error('userId is required');
-      }
+    // Validate userId
+    if (!activityData.userId) {
+      throw new Error('userId is required');
+    }
 
     // Fetch user details from Firestore
     const userDoc = await firestore.collection('user').doc(activityData.userId).get();
@@ -32,15 +35,36 @@ exports.addUserActivity = async (activityData) => {
 
     const userData = userDoc.data();
 
-    // Include user details in activity data
+    // Remove all spaces from writtenLetterOrWord
+    const sanitizedWrittenLetterOrWord = activityData.writtenLetterOrWord.replace(/\s+/g, '');
+
+    // Compare letterOrWord and writtenLetterOrWord for correctness
+    const correctness = activityData.letterOrWord === sanitizedWrittenLetterOrWord;
+
+    // Fetch the last activity for the user to determine the roundCount
+    const lastActivity = await UserActivity.findOne({ userId: activityData.userId })
+      .sort({ date: -1 });
+
+     const roundCount = lastActivity ? lastActivity.roundCount + 1 : 1; 
+     const wrongCount = correctness
+     ? (lastActivity ? lastActivity.wrongCount : 0) // Keep the same wrongCount if correct
+     : (lastActivity ? lastActivity.wrongCount + 1 : 1);
+
+     console.log(roundCount)
+    // Include user details and correctness in activity data
     const activity = new UserActivity({
       ...activityData,
       userEmail: userData.email,
       userName: userData.userName,
+      correctness: correctness,
+      roundCount: roundCount,
+      wrongCount: wrongCount,
+      writtenLetterOrWord:sanitizedWrittenLetterOrWord 
     });
 
-    console.log('Received activityData: >>>>', activityData);
-
+    console.log('==================================');
+    console.log('Processed activityData: ', activity);
+    console.log('==================================');
 
     // Save activity in MongoDB
     return await activity.save();

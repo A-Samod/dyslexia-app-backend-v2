@@ -18,6 +18,7 @@ const userActivitySchema = new mongoose.Schema({
   letterOrWord: { type: String, required: true },
   writtenLetterOrWord: { type: String, required: true },
   type: { type: String, required: true, enum: ["single", "two", "three"] },
+  correctness: { type: Boolean, required: true },
 });
 
 module.exports = mongoose.model("UserActivity", userActivitySchema);

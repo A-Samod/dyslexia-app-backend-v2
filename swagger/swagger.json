@@ -1,0 +1,59 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "DysLearn APIs",
+    "version": "1.0.0",
+    "description": "APIs for managing DysLearn features"
+  },
+  "paths": {
+    "/api/letters/{type}": {
+      "get": {
+        "summary": "Fetch letters by type",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "enum": ["single", "two", "three"]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of letters",
+            "schema": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      }
+    },
+    "/api/user-activities": {
+      "get": {
+        "summary": "Fetch all user activities",
+        "responses": {
+          "200": {
+            "description": "List of user activities",
+            "schema": { "type": "array", "items": { "type": "object" } }
+          }
+        }
+      }
+    },
+    "/api/user-activities/submit": {
+      "post": {
+        "summary": "Submit a user activity",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": { "type": "object" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Activity created successfully"
+          }
+        }
+      }
+    }
+  }
+}

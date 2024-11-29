@@ -55,7 +55,7 @@ model = Sequential([
 # model = keras.models.model_from_json(model_json, custom_objects={"Sequential": Sequential})
 # print(">>>>>>>>>>>>>>>>>> 1")
 model.load_weights("model/model_weights.h5")
-print(">>>>>>>>>>>>>>>>>> 2")
+print(">>>>>>>>>>>>>>>>>> ")
 
 def binarize_image(img):
       mean_val = np.mean(img)
